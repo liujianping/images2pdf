@@ -8,7 +8,6 @@ require (
 	github.com/x-mod/build v0.2.4
 	github.com/x-mod/cmd v0.2.12
 	github.com/x-mod/dir v0.1.1
-	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
 )
 
 require (
