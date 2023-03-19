@@ -1,0 +1,19 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  PROJECT: images2pdf
+  VERSION: $(git describe --tags --abbrev=0)
+
+tasks:
+  docker:
+    - docker build . -t {{.PROJECT}}:latest
+    - docker push {{.PROJECT}}:latest
+    - docker build . -t {{.PROJECT}}:{{ .VERSION }}
+    - docker push {{.PROJECT}}:{{ .VERSION }}
+
+  default:
+    cmds:
+      - task: docker
+    silent: true
