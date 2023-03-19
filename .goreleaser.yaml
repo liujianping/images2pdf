@@ -39,6 +39,11 @@ changelog:
       - '^docs:'
       - '^test:'
 
+dockers:
+  - image_templates:
+    - liujianping/images2pdf:latest
+    - liujianping/images2pdf:{{ .Tag }}
+
 # The lines beneath this are called `modelines`. See `:help modeline`
 # Feel free to remove those if you don't want/use them.
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
