@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"image"
+	"image/gif"
 	"image/jpeg"
+	"image/png"
 	"os"
 	"path/filepath"
 
@@ -60,29 +63,41 @@ func Images2PDF(cmd *cmd.Command, args []string) error {
 		}
 		defer imgFile.Close()
 
-		img, err := jpeg.Decode(imgFile)
-		if err != nil {
-			fmt.Printf("Error decoding %s: %v\n", inputFile, err)
-			continue
+		var img image.Image
+		switch filepath.Ext(file) {
+		case ".png":
+			img, err = png.Decode(imgFile)
+			if err != nil {
+				fmt.Printf("Error reading %s: %v\n", inputFile, err)
+				continue
+			}
+		case ".jpg", ".jpeg":
+			img, err = jpeg.Decode(imgFile)
+			if err != nil {
+				fmt.Printf("Error decoding %s: %v\n", inputFile, err)
+				continue
+			}
+		case ".gif":
+			img, err = gif.Decode(imgFile)
+			if err != nil {
+				fmt.Printf("Error decoding %s: %v\n", inputFile, err)
+				continue
+			}
 		}
-		log.Println("img bounds min (x, y)=> ", img.Bounds().Min.X, img.Bounds().Min.Y)
-		log.Println("img bounds max (x, y)=> ", img.Bounds().Max.X, img.Bounds().Max.Y)
 
 		w, h := gopdf.ImgReactagleToWH(img.Bounds())
-		log.Println("img to WH ", w, h)
-
-		// pdf.AddPage()
 		pdf.AddPageWithOption(gopdf.PageOption{
 			PageSize: &gopdf.Rect{W: w, H: h},
 		})
-
-		if err := pdf.Image(input.Path(file), 0, 0, nil); err != nil {
-			fmt.Printf("Error reading %s: %v\n", input.Path(file), err)
-			continue
+		if err := pdf.Image(inputFile, 0, 0, nil); err != nil {
+			return fmt.Errorf("failed to add image %s: %w", inputFile, err)
 		}
 	}
 
-	pdf.WritePdf(viper.GetString("output-file"))
+	if err := pdf.WritePdf(viper.GetString("output-file")); err != nil {
+		return fmt.Errorf("failed to write pdf: %w", err)
+	}
+
 	fmt.Printf("PDF file saved as %s.\n", viper.GetString("output-file"))
 	return nil
 }
