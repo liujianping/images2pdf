@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"image/jpeg"
+	"os"
 	"path/filepath"
 
 	"log"
@@ -42,7 +44,7 @@ func Images2PDF(cmd *cmd.Command, args []string) error {
 
 	pdf := gopdf.GoPdf{}
 	pdf.Start(gopdf.Config{PageSize: *gopdf.PageSizeA4})
-
+	log.Println("A4 page size (x, y) =>", gopdf.PageSizeA4)
 	for _, file := range files {
 		log.Println("file => ", file)
 
@@ -50,8 +52,30 @@ func Images2PDF(cmd *cmd.Command, args []string) error {
 			log.Println("file ignored => ", file)
 			continue
 		}
+		inputFile := input.Path(file)
+		imgFile, err := os.Open(inputFile)
+		if err != nil {
+			fmt.Printf("Error reading %s: %v\n", inputFile, err)
+			continue
+		}
+		defer imgFile.Close()
 
-		pdf.AddPage()
+		img, err := jpeg.Decode(imgFile)
+		if err != nil {
+			fmt.Printf("Error decoding %s: %v\n", inputFile, err)
+			continue
+		}
+		log.Println("img bounds min (x, y)=> ", img.Bounds().Min.X, img.Bounds().Min.Y)
+		log.Println("img bounds max (x, y)=> ", img.Bounds().Max.X, img.Bounds().Max.Y)
+
+		w, h := gopdf.ImgReactagleToWH(img.Bounds())
+		log.Println("img to WH ", w, h)
+
+		// pdf.AddPage()
+		pdf.AddPageWithOption(gopdf.PageOption{
+			PageSize: &gopdf.Rect{W: w, H: h},
+		})
+
 		if err := pdf.Image(input.Path(file), 0, 0, nil); err != nil {
 			fmt.Printf("Error reading %s: %v\n", input.Path(file), err)
 			continue
