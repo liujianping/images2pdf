@@ -10,8 +10,8 @@ vars:
 tasks:
   docker:
     - podman login -u liujianping -p $(pass docker.io/liujianping) docker.io
-    # - podman build . -t {{ .USERNAME }}/{{.PROJECT}}:latest
-    # - podman push {{ .USERNAME }}/{{.PROJECT}}:latest 
+    - podman build . -t {{ .USERNAME }}/{{.PROJECT}}:latest
+    - podman push {{ .USERNAME }}/{{.PROJECT}}:latest 
     - podman tag {{ .USERNAME }}/{{.PROJECT}}:latest {{ .USERNAME }}/{{.PROJECT}}:{{ .VERSION }}
     - podman push {{ .USERNAME }}/{{.PROJECT}}:{{ .VERSION }} 
 
