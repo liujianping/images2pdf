@@ -4,14 +4,16 @@ version: '3'
 
 vars:
   PROJECT: images2pdf
+  USERNAME: liujianping
   VERSION: $(git describe --tags --abbrev=0)
 
 tasks:
   docker:
-    - docker build . -t {{.PROJECT}}:latest
-    - docker push {{.PROJECT}}:latest
-    - docker build . -t {{.PROJECT}}:{{ .VERSION }}
-    - docker push {{.PROJECT}}:{{ .VERSION }}
+    - podman login -u liujianping -p $(pass docker.io/liujianping) docker.io
+    # - podman build . -t {{ .USERNAME }}/{{.PROJECT}}:latest
+    # - podman push {{ .USERNAME }}/{{.PROJECT}}:latest 
+    - podman tag {{ .USERNAME }}/{{.PROJECT}}:latest {{ .USERNAME }}/{{.PROJECT}}:{{ .VERSION }}
+    - podman push {{ .USERNAME }}/{{.PROJECT}}:{{ .VERSION }} 
 
   default:
     cmds:
